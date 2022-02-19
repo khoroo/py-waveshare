@@ -99,7 +99,7 @@ def draw_status_bar(
     # height instead of width because epd object assumes vertical rotation
     if total_state_text_width > epd.height:
         logging.info("status bar text longer than screen - cropping")
-        hpad = 0
+        hpad = 1
     else:
         hpad = ((epd.height - total_state_text_width) / len(state_texts)) // 1
 
@@ -114,7 +114,7 @@ def draw_status_bar(
         )
         left_limit += text_width + hpad
 
-    epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
+    # epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
 
     # logging.info("4.read bmp file on window")
     # blackimage1 = Image.new("1", (epd.height, epd.width), 255)  # 298*126
