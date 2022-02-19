@@ -101,7 +101,7 @@ def draw_status_bar(
         hpad = 0
     else:
         hpad = ((epd.width - total_state_text_width) / len(state_texts)) // 1
-    print(f"{epd.width=}\n{state_texts_width=}\n{total_state_text_width=}")
+    print(f"{epd.height=}\n{epd.width=}\n{state_texts_width=}\n{total_state_text_width=}")
 
     for text, text_width in zip(state_texts, state_texts_width):
         draw_text(
