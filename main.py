@@ -100,8 +100,8 @@ def draw_status_bar(
         logging.info("status bar text longer than screen - cropping")
         hpad = 0
     else:
-        hpad = ((epd.width - total_state_text_width) / len(state_texts)) // 1
-    print(f"{epd.height=}\n{epd.width=}\n{state_texts_width=}\n{total_state_text_width=}")
+        # height instead of width because epd object assumes vertical rotation
+        hpad = ((epd.height - total_state_text_width) / len(state_texts)) // 1
 
     for text, text_width in zip(state_texts, state_texts_width):
         draw_text(
