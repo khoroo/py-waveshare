@@ -80,7 +80,7 @@ def draw_status_bar(
     resources_dir: Path,
 ) -> None:
     img = Image.new("1", (epd.height, epd.width), 255)
-    draw = ImageDraw.Draw(img_b)
+    draw = ImageDraw.Draw(img)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
 
     left_limit = 0
