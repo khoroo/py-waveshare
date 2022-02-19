@@ -33,9 +33,9 @@ def get_wifi_data():
         if not line:
             break
         if b"Signal level" in line:
-            db = line.decode("ascii").split("=")[-1]
+            db = line.decode("ascii").strip().split("=")[-1]
         elif b"ESSID" in line:
-            name = line.decode("ascii").split('"')[1]
+            name = line.decode("ascii").strip().split('"')[1]
             break
     return name, db
 
