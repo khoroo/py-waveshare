@@ -10,19 +10,19 @@ import socket
 import subprocess
 
 
+@dataclass
+class StatusBarState:
+    local_ip: str
+    wifi_name: str
+    wifi_db: str
+
+
 def get_local_ip() -> str:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
     ip = s.getsockname()[0]
     s.close()
     return ip
-
-
-@dataclass
-class StatusBarState:
-    local_ip: str
-    wifi_name: str
-    wifi_db: str
 
 
 def get_wifi_data():
@@ -41,7 +41,7 @@ def get_wifi_data():
     return name, db
 
 
-def get_current_status_bar_state() -> StatusBarState:
+def get_status_bar_state() -> StatusBarState:
     wifi_name, wifi_db = get_wifi_data()
 
     return StatusBarState(
@@ -70,56 +70,44 @@ class Text:
     anchor: str = "lt"
 
 
-def draw_text(t: Text) -> Tuple[int]:
+def draw_text(t: Text) -> None:
     t.draw.text(t.pos, t.text, anchor=t.anchor, font=t.font, fill=0)
-    return t.font.getmask(t.text).size
 
 
-def draw_routine(resources_dir: Path) -> None:
-    status_bar = get_current_status_bar_state()
-    epd = epd2in13b_V3.EPD()
-    point_centre = (epd.height // 2, epd.width // 2)
-    epd.init()
-    epd.Clear()
-
-    logging.info("Drawing")
-    font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
-
+def draw_status_bar(state: StatusBarState, resources_dir: Path) -> None:
     img_b = Image.new("1", (epd.height, epd.width), 255)
     img_r = Image.new("1", (epd.height, epd.width), 255)
 
     draw_b = ImageDraw.Draw(img_b)
     draw_r = ImageDraw.Draw(img_r)
 
+    font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
+
     left_limit = 0
-    hpad = 8
-    vpad = 2
-    text_width, _ = draw_text(
-        Text(
-            draw=draw_b,
-            pos=(left_limit, 0),
-            text=status_bar.local_ip,
-            font=font,
-        )
+    print(font.getmask("hello world"))
+    state_texts = (state.local_ip, state.wifi_name, state.wifi_db)
+    total_status_bar_text_width = sum(
+        font.getmask(text).size[0] for text in state_texts
     )
-    left_limit += text_width + hpad
-    text_width, _ = draw_text(
-        Text(
-            draw=draw_b,
-            pos=(left_limit + hpad, 0),
-            text=status_bar.wifi_name,
-            font=font,
+    if total_status_bar_text_width > epd.width:
+        logging.info("status bar text longer than screen - cropping")
+        hpad = 0
+    else:
+        hpad = (
+            (epd.width - total_status_bar_text_width) / len(state_texts)
+        ) // 1
+
+    for text in state_texts:
+        text_width, _ = draw_text(
+            Text(
+                draw=draw_b,
+                pos=(left_limit, 0),
+                text=text,
+                font=font,
+            )
         )
-    )
-    left_limit += text_width + hpad
-    text_width, _ = draw_text(
-        Text(
-            draw=draw_b,
-            pos=(left_limit + hpad, 0),
-            text=status_bar.wifi_db,
-            font=font,
-        )
-    )
+        left_limit += text_width + hpad
+
     epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
 
     # logging.info("4.read bmp file on window")
@@ -131,11 +119,17 @@ def draw_routine(resources_dir: Path) -> None:
 
 
 def main():
+    status_bar_state = get_status_bar_state()
+    epd = epd2in13b_V3.EPD()
+    print(f"epd type: {type(epd)}")
+    point_centre = (epd.height // 2, epd.width // 2)
+    epd.init()
+    epd.Clear()
     resources_dir = Path("./resources")
     logging.basicConfig(level=logging.DEBUG)
 
     try:
-        draw_routine(resources_dir)
+        draw_status_bar_routine(epd, status_bar_state, resources_dir)
     except IOError as e:
         logging.info(e)
     except KeyboardInterrupt:
