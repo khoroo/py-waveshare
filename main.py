@@ -53,31 +53,18 @@ def get_status_bar_state() -> StatusBarState:
     )
 
 
+@dataclass
 class Text:
-    def __init__(
-        self,
-        draw: ImageDraw.Draw,
-        x: int,
-        y: int,
-        text: str,
-        font: ImageFont,
-        anchor: str = "lt",
-    ):
-        self.draw = draw
-        self.x = x
-        self.y = y
-        self.text = text
-        self.font = font
-        self.anchor = anchor
+    draw: ImageDraw.Draw
+    x: int
+    y: int
+    text: str
+    font: ImageFont
+    anchor: str = "lt"
 
-    def draw(self) -> None:
-        self.draw.text(
-            (self.x, self.y),
-            self.text,
-            anchor=self.anchor,
-            font=self.font,
-            fill=0,
-        )
+
+def draw_text(t: Text) -> None:
+    t.draw.text((t.x, t.y), t.text, anchor=t.anchor, font=t.font, fill=0)
 
 
 def draw_status_bar(
@@ -108,13 +95,15 @@ def draw_status_bar(
 
     # draw status bar text
     for text, text_width in zip(state_texts, state_texts_width):
-        Text(
-            draw=draw,
-            x=left_limit,
-            y=0,
-            text=text,
-            font=font,
-        ).draw()
+        draw_text(
+            Text(
+                draw=draw,
+                x=left_limit,
+                y=0,
+                text=text,
+                font=font,
+            )
+        )
         left_limit += text_width + hpad
 
     # draw status bar line
@@ -143,13 +132,15 @@ def draw_event(
     draw = ImageDraw.Draw(img)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
 
-    Text(
-        draw=draw,
-        x=0,
-        y=y,
-        text=text,
-        font=font,
-    ).draw()
+    draw_text(
+        Text(
+            draw=draw,
+            x=0,
+            y=y,
+            text=text,
+            font=font,
+        )
+    )
 
     epd.display(
         epd.getbuffer(img),
