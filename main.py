@@ -26,16 +26,19 @@ class StatusBarState:
 
 def get_current_status_bar_state() -> StatusBarState:
     def get_iwlist_scan():
-        return subprocess.Popen(
-            ["iwlist", "wlan0", "scan"],
-            stdout=subprocess.PIPE,
             universal_newlines=True,
         ).communicate()
 
     iwlist_out, iwlist_err = get_iwlist_scan()
 
-    def parse_iwlist_out(out: str):
-        for line in out:
+    def get_wifi_data():
+        proc= subprocess.Popen(
+            ["iwlist", "wlan0", "scan"],
+            stdout=subprocess.PIPE)
+        while True:
+            line = proc.stdout.readline()
+            if not line:
+                break
             if "Signal level" in line:
                 db = line.split("=")[-1]
             elif "ESSID" in line:
@@ -43,7 +46,7 @@ def get_current_status_bar_state() -> StatusBarState:
                 break
         return name, db
 
-    wifi_name, wifi_db = parse_iwlist_out(iwlist_out)
+    wifi_name, wifi_db = get_wifi_data(iwlist_out)
 
     return StatusBarState(
         local_ip=get_local_ip(),
