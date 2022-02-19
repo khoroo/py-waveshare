@@ -32,10 +32,10 @@ def get_wifi_data():
         line = proc.stdout.readline()
         if not line:
             break
-        if "Signal level" in line:
-            db = line.split("=")[-1]
-        elif "ESSID" in line:
-            name = line.split('"')[1]
+        if b"Signal level" in line:
+            db = line.decode("ascii").split("=")[-1]
+        elif b"ESSID" in line:
+            name = line.decode("ascii").split('"')[1]
             break
     return name, db
 
