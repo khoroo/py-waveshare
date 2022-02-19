@@ -28,7 +28,7 @@ def draw_routine(resources_dir: Path) -> None:
 
     # Drawing on the image
     logging.info("Drawing")
-    font = ImageFont.truetype(str(resources_dir / "scientifica.ttf"), 24)
+    font = ImageFont.load(str(resources_dir / "spleen-5x8.bdf"))
 
     HBlackimage = Image.new("1", (epd.height, epd.width), 255)  # 298*126
     HRYimage = Image.new(
