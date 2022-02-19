@@ -25,7 +25,7 @@ def get_local_ip() -> str:
     return ip
 
 
-def get_wifi_data():
+def get_wifi_data() -> Tuple[str]:
     proc = subprocess.Popen(
         ["iwlist", "wlan0", "scan"], stdout=subprocess.PIPE
     )
@@ -74,7 +74,11 @@ def draw_text(t: Text) -> None:
     t.draw.text(t.pos, t.text, anchor=t.anchor, font=t.font, fill=0)
 
 
-def draw_status_bar(state: StatusBarState, resources_dir: Path) -> None:
+def draw_status_bar(
+    epd: epd2in13b_V3.EPD,
+    state: StatusBarState,
+    resources_dir: Path,
+) -> None:
     img_b = Image.new("1", (epd.height, epd.width), 255)
     img_r = Image.new("1", (epd.height, epd.width), 255)
 
@@ -121,15 +125,13 @@ def draw_status_bar(state: StatusBarState, resources_dir: Path) -> None:
 def main():
     status_bar_state = get_status_bar_state()
     epd = epd2in13b_V3.EPD()
-    print(f"epd type: {type(epd)}")
-    point_centre = (epd.height // 2, epd.width // 2)
     epd.init()
     epd.Clear()
     resources_dir = Path("./resources")
     logging.basicConfig(level=logging.DEBUG)
 
     try:
-        draw_status_bar_routine(epd, status_bar_state, resources_dir)
+        draw_status_bar(epd, status_bar_state, resources_dir)
     except IOError as e:
         logging.info(e)
     except KeyboardInterrupt:
