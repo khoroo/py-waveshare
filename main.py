@@ -67,11 +67,17 @@ def draw_text(t: Text) -> None:
     t.draw.text((t.x, t.y), t.text, anchor=t.anchor, font=t.font, fill=0)
 
 
+@dataclass
+class DrawReturn:
+    img: Image
+    y: int
+
+
 def draw_status_bar(
     epd: epd2in13b_V3.EPD,
     state: StatusBarState,
     resources_dir: Path,
-):
+) -> DrawReturn:
     img = Image.new("1", (epd.height, epd.width), 255)
     draw = ImageDraw.Draw(img)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
@@ -110,21 +116,17 @@ def draw_status_bar(
     line_height = max_state_text_height + 1
     draw.line((0, line_height, epd.height, line_height), fill=0)
 
-    epd.display(
-        epd.getbuffer(img),
-        epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
-    )
-    return img, line_height
+    return DrawReturn(img, line_height)
 
 
-def draw_event(
+def get_next_event_img(
     epd: epd2in13b_V3.EPD,
     event: Event,
     resources_dir: Path,
     y: int,
     img: Image,
     vpad: int = 2,
-):
+) -> DrawReturn:
     event_flags = "    ".join(
         str(flag) for flag in flags.from_mask(event.mask)
     )
@@ -141,8 +143,7 @@ def draw_event(
             font=font,
         )
     )
-
-    return img, (y + font.getmask(text).size[1])
+    return DrawReturn(img, y + font.getmask(text).size[1])
 
 
 def main():
@@ -160,28 +161,28 @@ def main():
     wd = inotify.add_watch("downloads/", watch_flags)
 
     try:
-        img, y = draw_status_bar(epd, status_bar_state, resources_dir)
+        dr = draw_status_bar(epd, status_bar_state, resources_dir)
         while True:
             events = inotify.read()
             refreshed_drawing_events = False
             for event in events:
-                img, y = get_next_event_img(epd, event, resources_dir, y, img)
-                if y > epd.width:
+                dr = get_next_event_img(
+                    epd, event, resources_dir, dr.y, dr.img
+                )
+                if dr.y > epd.width:
                     refreshed_drawing_events = True
                     epd.display(
-                        epd.getbuffer(img),
+                        epd.getbuffer(dr.img),
                         epd.getbuffer(
                             Image.new("1", (epd.height, epd.width), 255)
                         ),
                     )
                     time.sleep(2)
                     epd.Clear()
-                    img, y = draw_status_bar(
-                        epd, status_bar_state, resources_dir
-                    )
+                    dr = draw_status_bar(epd, status_bar_state, resources_dir)
             if refreshed_drawing_events:
                 epd.display(
-                    epd.getbuffer(img),
+                    epd.getbuffer(dr.img),
                     epd.getbuffer(
                         Image.new("1", (epd.height, epd.width), 255)
                     ),
