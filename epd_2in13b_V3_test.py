@@ -28,8 +28,8 @@ class Display:
     def __init__(self, bottom_right: Pair):
         self.br = bottom_right
         self.tl = Pair(0, 0)
-        self.tr = Pair(size.x, 0)
-        self.bl = Pair(0, size.y)
+        self.tr = Pair(bottom_right.x, 0)
+        self.bl = Pair(0, bottom_right.y)
 
     @classmethod
     def get_centre(self, size: Pair) -> Pair:
