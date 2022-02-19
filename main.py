@@ -9,10 +9,15 @@ import socket
 import time
 import traceback
 
+def get_local_ip() -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
 
 def draw_routine(resources_dir: Path) -> None:
-    hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
+    local_ip = get_local_ip()
 
 
     epd = epd2in13b_V3.EPD()
