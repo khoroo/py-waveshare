@@ -68,34 +68,34 @@ def draw_routine(resources_dir: Path) -> None:
     epd.init()
     epd.Clear()
 
-    # Drawing on the image
     logging.info("Drawing")
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
 
-    HBlackimage = Image.new("1", (epd.height, epd.width), 255)  # 298*126
-    HRYimage = Image.new(
-        "1", (epd.height, epd.width), 255
-    )  # 298*126  ryimage: red or yellow image
-    drawblack = ImageDraw.Draw(HBlackimage)
-    drawry = ImageDraw.Draw(HRYimage)
-    drawblack.text(
+    img_b = Image.new("1", (epd.height, epd.width), 255) 
+    img_r = Image.new("1", (epd.height, epd.width), 255)
+
+    draw_b = ImageDraw.Draw(img_b)
+    draw_r = ImageDraw.Draw(img_r)
+
+    draw_b.text(
         (0, 0), status_bar_state.local_ip, anchor="lt", font=font, fill=0
     )
-    drawblack.text(
-        (get_horiz_padding(drawblack), 0),
+
+    draw_b.text(
+        (get_horiz_padding(img_b), 0),
         status_bar_state.wifi_name,
         anchor="lt",
         font=font,
         fill=0,
     )
-    drawblack.text(
-        (get_horiz_padding(drawblack), 0),
+    draw_b.text(
+        (get_horiz_padding(img_b), 0),
         status_bar_state.wifi_db,
         anchor="lt",
         font=font,
         fill=0,
     )
-    epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HRYimage))
+    epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
 
     # logging.info("4.read bmp file on window")
     # blackimage1 = Image.new("1", (epd.height, epd.width), 255)  # 298*126
