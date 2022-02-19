@@ -71,7 +71,7 @@ def draw_status_bar(
     epd: epd2in13b_V3.EPD,
     state: StatusBarState,
     resources_dir: Path,
-) -> int:
+):
     img = Image.new("1", (epd.height, epd.width), 255)
     draw = ImageDraw.Draw(img)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
@@ -114,7 +114,7 @@ def draw_status_bar(
         epd.getbuffer(img),
         epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
     )
-    return line_height
+    return img, line_height
 
 
 def draw_event(
@@ -122,8 +122,9 @@ def draw_event(
     event,
     resources_dir: Path,
     y: int,
+    img: Image,
     vpad: int = 2,
-) -> int:
+):
     event_flags = "    ".join(
         str(flag) for flag in flags.from_mask(event.mask)
     )
@@ -147,7 +148,7 @@ def draw_event(
         epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
     )
 
-    return font.getmask(text).size[1]
+    return img, (y + font.getmask(text).size[1])
 
 
 def main():
@@ -165,15 +166,17 @@ def main():
     wd = inotify.add_watch("downloads/", watch_flags)
 
     try:
-        y = draw_status_bar(epd, status_bar_state, resources_dir)
+        img, y = draw_status_bar(epd, status_bar_state, resources_dir)
         while True:
             events = inotify.read()
             for event in events:
                 print(type(event))
-                y = draw_event(epd, event, resources_dir, y)
+                img, y = draw_event(epd, event, resources_dir, y, img)
                 if y > epd.width:
                     epd.Clear()
-                    y = draw_status_bar(epd, status_bar_state, resources_dir)
+                    img, y = draw_status_bar(
+                        epd, status_bar_state, resources_dir
+                    )
             time.sleep(1)
 
     except IOError as e:
