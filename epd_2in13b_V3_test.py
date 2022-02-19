@@ -25,7 +25,7 @@ try:
 
     # Drawing on the image
     logging.info("Drawing")
-    font20 = ImageFont.truetype(picdir / "Font.ttc", 20)
+    font20 = ImageFont.truetype(str(picdir / "Font.ttc"), 20)
 
     # Drawing on the Horizontal image
     logging.info("1.Drawing on the Horizontal image...")
