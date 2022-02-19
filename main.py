@@ -80,6 +80,7 @@ def draw_routine(resources_dir: Path) -> None:
     draw_b.text(
         (0, 0), status_bar_state.local_ip, anchor="lt", font=font, fill=0
     )
+    print(get_horiz_padding(img_b))
 
     draw_b.text(
         (get_horiz_padding(img_b), 0),
