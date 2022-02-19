@@ -63,7 +63,7 @@ def get_vert_padding(d: ImageDraw.Draw, px_pad: int = 2) -> int:
 
 @dataclass
 class Text:
-    draw: Image.ImageDraw
+    draw: ImageDraw.Draw
     pos: Tuple[int]
     text: str
     font: ImageFont
