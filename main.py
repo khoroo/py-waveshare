@@ -78,7 +78,7 @@ def draw_status_bar(
     epd: epd2in13b_V3.EPD,
     state: StatusBarState,
     resources_dir: Path,
-) -> None:
+) -> int:
     img = Image.new("1", (epd.height, epd.width), 255)
     draw = ImageDraw.Draw(img)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
@@ -88,8 +88,10 @@ def draw_status_bar(
     state_texts_width = tuple(
         font.getmask(text).size[0] for text in state_texts
     )
-
     total_state_text_width = sum(state_texts_width)
+    max_state_text_height = max(
+        font.getmask(text).size[1] for text in state_texts
+    )
 
     # height instead of width because epd object assumes vertical rotation
     if total_state_text_width > epd.height:
@@ -111,12 +113,14 @@ def draw_status_bar(
         left_limit += text_width + hpad
 
     # draw status bar line
-    line_height = 10
-    draw.line((0, line_height, epd.width, line_height), fill = 0)
+    line_height = max_state_text_height + 1
+    draw.line((0, line_height, epd.height, line_height), fill=0)
 
-
-    epd.display(epd.getbuffer(img), epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)))
-
+    epd.display(
+        epd.getbuffer(img),
+        epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
+    )
+    return line_height
 
 
 def main():
@@ -128,7 +132,8 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
 
     try:
-        draw_status_bar(epd, status_bar_state, resources_dir)
+        top_limit = draw_status_bar(epd, status_bar_state, resources_dir)
+        print(top_limit)
     except IOError as e:
         logging.info(e)
     except KeyboardInterrupt:
