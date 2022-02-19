@@ -74,7 +74,7 @@ def draw_routine(resources_dir: Path) -> None:
     drawblack.text(
         (point_centre[0], 0),
         status_bar_state.wifi_name,
-        anchor="mt",
+        anchor="lt",
         font=font,
         fill=0,
     )
