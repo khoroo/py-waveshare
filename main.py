@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Tuple
 from waveshare_epd import epd2in13b_V3
 import logging
+import time
 import socket
 import subprocess
 
@@ -55,13 +56,19 @@ def get_status_bar_state() -> StatusBarState:
 @dataclass
 class Text:
     draw: ImageDraw.Draw
-    pos: Tuple[int]
+    x: int
+    y: int
     text: str
     font: ImageFont
     anchor: str = "lt"
+
     def draw(self) -> None:
         self.draw.text(
-            self.pos, self.text, anchor=self.anchor, font=self.font, fill=0
+            (self.x, self.y),
+            self.text,
+            anchor=self.anchor,
+            font=self.font,
+            fill=0,
         )
 
 
@@ -95,7 +102,8 @@ def draw_status_bar(
     for text, text_width in zip(state_texts, state_texts_width):
         Text(
             draw=draw,
-            pos=(left_limit, 0),
+            x=left_limit,
+            y=0,
             text=text,
             font=font,
         ).draw()
@@ -112,7 +120,7 @@ def draw_status_bar(
     return line_height
 
 
-def draw_event_bar(
+def draw_event(
     epd: epd2in13b_V3.EPD,
     event,
     resources_dir: Path,
@@ -129,7 +137,8 @@ def draw_event_bar(
 
     Text(
         draw=draw,
-        pos=(0, y),
+        x=0,
+        y=y,
         text=text,
         font=font,
     ).draw()
