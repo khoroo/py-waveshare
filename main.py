@@ -129,7 +129,6 @@ def draw_event(
         str(flag) for flag in flags.from_mask(event.mask)
     )
     text = f"{event.name}  {event_flags}"
-    img = Image.new("1", (epd.height, epd.width), 255)
     draw = ImageDraw.Draw(img)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
 
