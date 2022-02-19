@@ -50,6 +50,16 @@ def get_current_status_bar_state() -> StatusBarState:
     )
 
 
+def get_horiz_padding(d: ImageDraw.Draw, px_pad: int = 5) -> int:
+    _, _, width, _ = d.getbbox()
+    return width + px_pad
+
+
+def get_vert_padding(d: ImageDraw.Draw, px_pad: int = 2) -> int:
+    _, _, _, vert = d.getbbox()
+    return vert + px_pad
+
+
 def draw_routine(resources_dir: Path) -> None:
     status_bar_state = get_current_status_bar_state()
 
@@ -72,16 +82,16 @@ def draw_routine(resources_dir: Path) -> None:
         (0, 0), status_bar_state.local_ip, anchor="lt", font=font, fill=0
     )
     drawblack.text(
-        (point_centre[0], 0),
+        (get_horiz_padding(drawblack), 0),
         status_bar_state.wifi_name,
         anchor="lt",
         font=font,
         fill=0,
     )
     drawblack.text(
-        (epd.width, 0),
+        (get_horiz_padding(drawblack), 0),
         status_bar_state.wifi_db,
-        anchor="rt",
+        anchor="lt",
         font=font,
         fill=0,
     )
