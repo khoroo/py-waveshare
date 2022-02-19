@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 from dataclasses import dataclass
 from pathlib import Path
 from waveshare_epd import epd2in13b_V3
+from typing import Tuple
 import logging
 import socket
 import subprocess
@@ -60,9 +61,23 @@ def get_vert_padding(d: ImageDraw.Draw, px_pad: int = 2) -> int:
     return vert + px_pad
 
 
-def draw_routine(resources_dir: Path) -> None:
-    status_bar_state = get_current_status_bar_state()
+@dataclass
+class Text:
+    draw: Image.ImageDraw
+    pos: Tuple[int]
+    text: str
+    font: ImageFont
+    anchor: str = "lt"
 
+
+def draw_text(t: Text) -> Tuple[int]:
+    draw.text(t.pos, t.text, anchor=t.anchor, font=t.font, fill=0)
+    print(t.font.getmask(text).size)
+    return 0, 0
+
+
+def draw_routine(resources_dir: Path) -> None:
+    status_bar = get_current_status_bar_state()
     epd = epd2in13b_V3.EPD()
     point_centre = (epd.height // 2, epd.width // 2)
     epd.init()
@@ -71,30 +86,14 @@ def draw_routine(resources_dir: Path) -> None:
     logging.info("Drawing")
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
 
-    img_b = Image.new("1", (epd.height, epd.width), 255) 
+    img_b = Image.new("1", (epd.height, epd.width), 255)
     img_r = Image.new("1", (epd.height, epd.width), 255)
 
     draw_b = ImageDraw.Draw(img_b)
     draw_r = ImageDraw.Draw(img_r)
 
-    draw_b.text(
-        (0, 0), status_bar_state.local_ip, anchor="lt", font=font, fill=0
-    )
-    print(get_horiz_padding(img_b))
-
-    draw_b.text(
-        (get_horiz_padding(img_b), 0),
-        status_bar_state.wifi_name,
-        anchor="lt",
-        font=font,
-        fill=0,
-    )
-    draw_b.text(
-        (get_horiz_padding(img_b), 0),
-        status_bar_state.wifi_db,
-        anchor="lt",
-        font=font,
-        fill=0,
+    draw_text(
+        Text(draw=draw_b, pos=(0, 0), text=status_bar.wifi_name, font=font)
     )
     epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
 
