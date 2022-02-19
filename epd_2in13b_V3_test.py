@@ -40,7 +40,7 @@ def main():
         # logging.info("4.read bmp file on window")
         blackimage1 = Image.new('1', (epd.height, epd.width), 255)  # 298*126
         redimage1 = Image.new('1', (epd.height, epd.width), 255)  # 298*126    
-        newimage = Image.open(os.path.join(picdir, '100x100.bmp'))
+        newimage = Image.open(str(picdir / '100x100.bmp'))
         blackimage1.paste(newimage, (0,0))
         epd.display(epd.getbuffer(blackimage1), epd.getbuffer(redimage1))
 
