@@ -92,7 +92,7 @@ def draw_routine(resources_dir: Path) -> None:
     draw_r = ImageDraw.Draw(img_r)
 
     left_limit = 0
-    hpad = 5
+    hpad = 8
     vpad = 2
     text_width, _ = draw_text(
         Text(
