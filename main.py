@@ -125,7 +125,7 @@ def get_next_event_img(
     resources_dir: Path,
     y: int,
     img: Image,
-    vpad: int = 2,
+    vpad: int = 4,
 ) -> DrawReturn:
     event_flags = "    ".join(
         str(flag) for flag in flags.from_mask(event.mask)
