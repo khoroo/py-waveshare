@@ -115,7 +115,7 @@ def draw_status_bar(
     draw.line((0, line_height, epd.width, line_height), fill = 0)
 
 
-    epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
+    epd.display(epd.getbuffer(img))
 
 
 
