@@ -6,8 +6,7 @@ from pathlib import Path
 from waveshare_epd import epd2in13b_V3
 import logging
 import socket
-import time
-import traceback
+import subprocess
 
 
 def get_local_ip() -> str:
@@ -18,8 +17,43 @@ def get_local_ip() -> str:
     return ip
 
 
+@dataclass
+class StatusBarState:
+    local_ip: str
+    wifi_name: str
+    wifi_db: str
+
+
+def get_current_status_bar_state() -> StatusBarState:
+    def get_iwlist_scan():
+        return subprocess.Popen(
+            ["iwlist", "wlan0", "scan"],
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        ).communicate()
+
+    iwlist_out, iwlist_err = get_iwlist_scan()
+
+    def parse_iwlist_out(out: str):
+        for line in out:
+            if "Signal level" in line:
+                db = line.split("=")[-1]
+            elif "ESSID" in line:
+                name = line.split('"')[1]
+                break
+        return name, db
+
+    wifi_name, wifi_db = parse_iwlist_out(iwlist_out)
+
+    return StatusBarState(
+        local_ip=get_local_ip(),
+        wifi_name=wifi_name,
+        wifi_db=wifi_db,
+    )
+
+
 def draw_routine(resources_dir: Path) -> None:
-    local_ip = get_local_ip()
+    status_bar_state = get_current_status_bar_state()
 
     epd = epd2in13b_V3.EPD()
     point_centre = (epd.height // 2, epd.width // 2)
@@ -36,7 +70,23 @@ def draw_routine(resources_dir: Path) -> None:
     )  # 298*126  ryimage: red or yellow image
     drawblack = ImageDraw.Draw(HBlackimage)
     drawry = ImageDraw.Draw(HRYimage)
-    drawblack.text((0, 0), local_ip, anchor="lt", font=font, fill=0)
+    drawblack.text(
+        (0, 0), status_bar_state.local_ip, anchor="lt", font=font, fill=0
+    )
+    drawblack.text(
+        (point_centre[0], 0),
+        status_bar_state.wifi_name,
+        anchor="mt",
+        font=font,
+        fill=0,
+    )
+    drawblack.text(
+        (epd.width, 0),
+        status_bar_state.wifi_db,
+        anchor="rt",
+        font=font,
+        fill=0,
+    )
     epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HRYimage))
 
     # logging.info("4.read bmp file on window")
