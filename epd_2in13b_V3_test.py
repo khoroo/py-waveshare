@@ -41,7 +41,7 @@ class Display:
 def draw_routine(resource_dir: Path) -> None:
     epd = epd2in13b_V3.EPD()
     display = Display(Pair(epd.width, epd.height))
-    display_centre = (epd.width//2, epd.height//2)
+    display_centre = (epd.height//2, epd.width//2)
     epd.init()
     epd.Clear()
 
