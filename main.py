@@ -79,16 +79,11 @@ def draw_status_bar(
     state: StatusBarState,
     resources_dir: Path,
 ) -> None:
-    img_b = Image.new("1", (epd.height, epd.width), 255)
-    img_r = Image.new("1", (epd.height, epd.width), 255)
-
-    draw_b = ImageDraw.Draw(img_b)
-    draw_r = ImageDraw.Draw(img_r)
-
+    img = Image.new("1", (epd.height, epd.width), 255)
+    draw = ImageDraw.Draw(img_b)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
 
     left_limit = 0
-    print(font.getmask("hello world"))
     state_texts = (state.local_ip, state.wifi_name, state.wifi_db)
     state_texts_width = tuple(
         font.getmask(text).size[0] for text in state_texts
@@ -103,10 +98,11 @@ def draw_status_bar(
     else:
         hpad = ((epd.height - total_state_text_width) / len(state_texts)) // 1
 
+    # draw status bar text
     for text, text_width in zip(state_texts, state_texts_width):
         draw_text(
             Text(
-                draw=draw_b,
+                draw=draw,
                 pos=(left_limit, 0),
                 text=text,
                 font=font,
@@ -114,14 +110,13 @@ def draw_status_bar(
         )
         left_limit += text_width + hpad
 
-    # epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
+    # draw status bar line
+    line_height = 10
+    draw.line((0, line_height, epd.width, line_height), fill = 0)
 
-    # logging.info("4.read bmp file on window")
-    # blackimage1 = Image.new("1", (epd.height, epd.width), 255)  # 298*126
-    # redimage1 = Image.new("1", (epd.height, epd.width), 255)  # 298*126
-    # newimage = Image.open(str(resource_dir / "100x100.bmp"))
-    # blackimage1.paste(newimage, (0, 0))
-    # epd.display(epd.getbuffer(blackimage1), epd.getbuffer(redimage1))
+
+    epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
+
 
 
 def main():
