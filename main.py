@@ -72,8 +72,7 @@ class Text:
 
 def draw_text(t: Text) -> Tuple[int]:
     t.draw.text(t.pos, t.text, anchor=t.anchor, font=t.font, fill=0)
-    print(t.font.getmask(t.text).size)
-    return 0, 0
+    return t.font.getmask(t.text).size
 
 
 def draw_routine(resources_dir: Path) -> None:
@@ -92,8 +91,34 @@ def draw_routine(resources_dir: Path) -> None:
     draw_b = ImageDraw.Draw(img_b)
     draw_r = ImageDraw.Draw(img_r)
 
-    draw_text(
-        Text(draw=draw_b, pos=(0, 0), text=status_bar.wifi_name, font=font)
+    left_limit = 0
+    hpad = 5
+    vpad = 2
+    text_width, _ = draw_text(
+        Text(
+            draw=draw_b,
+            pos=(left_limit, 0),
+            text=status_bar.local_ip,
+            font=font,
+        )
+    )
+    left_limit += text_width + hpad
+    text_width, _ = draw_text(
+        Text(
+            draw=draw_b,
+            pos=(left_limit + hpad, 0),
+            text=status_bar.wifi_name,
+            font=font,
+        )
+    )
+    left_limit += text_width + hpad
+    text_width, _ = draw_text(
+        Text(
+            draw=draw_b,
+            pos=(left_limit + hpad, 0),
+            text=status_bar.wifi_db,
+            font=font,
+        )
     )
     epd.display(epd.getbuffer(img_b), epd.getbuffer(img_r))
 
