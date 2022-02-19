@@ -2,9 +2,10 @@
 # -*- coding:utf-8 -*-
 from PIL import Image, ImageDraw, ImageFont
 from dataclasses import dataclass
+from inotify_simple import INotify, flags
 from pathlib import Path
-from waveshare_epd import epd2in13b_V3
 from typing import Tuple
+from waveshare_epd import epd2in13b_V3
 import logging
 import socket
 import subprocess
@@ -51,16 +52,6 @@ def get_status_bar_state() -> StatusBarState:
     )
 
 
-def get_horiz_padding(d: ImageDraw.Draw, px_pad: int = 5) -> int:
-    _, _, width, _ = d.getbbox()
-    return width + px_pad
-
-
-def get_vert_padding(d: ImageDraw.Draw, px_pad: int = 2) -> int:
-    _, _, _, vert = d.getbbox()
-    return vert + px_pad
-
-
 @dataclass
 class Text:
     draw: ImageDraw.Draw
@@ -69,9 +60,10 @@ class Text:
     font: ImageFont
     anchor: str = "lt"
 
-
-def draw_text(t: Text) -> None:
-    t.draw.text(t.pos, t.text, anchor=t.anchor, font=t.font, fill=0)
+    def draw(self) -> None:
+        self.draw.text(
+            self.pos, self.text, anchor=self.anchor, font=self.font, fill=0
+        )
 
 
 def draw_status_bar(
@@ -102,14 +94,12 @@ def draw_status_bar(
 
     # draw status bar text
     for text, text_width in zip(state_texts, state_texts_width):
-        draw_text(
-            Text(
-                draw=draw,
-                pos=(left_limit, 0),
-                text=text,
-                font=font,
-            )
-        )
+        Text(
+            draw=draw,
+            pos=(left_limit, 0),
+            text=text,
+            font=font,
+        ).draw()
         left_limit += text_width + hpad
 
     # draw status bar line
@@ -123,6 +113,35 @@ def draw_status_bar(
     return line_height
 
 
+def draw_event_bar(
+    epd: epd2in13b_V3.EPD,
+    event,
+    y: int,
+    vpad: int = 2,
+) -> int:
+    event_flags = "    ".join(
+        str(flag) for flag in flags.from_mask(event.mask)
+    )
+    text = f"{event.name}  {event_flags}"
+    img = Image.new("1", (epd.height, epd.width), 255)
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
+
+    Text(
+        draw=draw,
+        pos=(0, y),
+        text=text,
+        font=font,
+    ).draw()
+
+    epd.display(
+        epd.getbuffer(img),
+        epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
+    )
+
+    return font.getmask(text).size[1]
+
+
 def main():
     status_bar_state = get_status_bar_state()
     epd = epd2in13b_V3.EPD()
@@ -131,9 +150,24 @@ def main():
     resources_dir = Path("./resources")
     logging.basicConfig(level=logging.DEBUG)
 
+    inotify = INotify()
+    watch_flags = (
+        flags.CREATE | flags.DELETE | flags.MODIFY | flags.DELETE_SELF
+    )
+    wd = inotify.add_watch("downloads/", watch_flags)
+
     try:
-        top_limit = draw_status_bar(epd, status_bar_state, resources_dir)
-        print(top_limit)
+        y = draw_status_bar(epd, status_bar_state, resources_dir)
+        while True:
+            events = inotify.read()
+            for event in events:
+                print(type(event))
+                y = draw_event(epd, event, y)
+                if y > epd.width:
+                    epd.Clear()
+                    y = draw_status_bar(epd, status_bar_state, resources_dir)
+            time.sleep(1)
+
     except IOError as e:
         logging.info(e)
     except KeyboardInterrupt:

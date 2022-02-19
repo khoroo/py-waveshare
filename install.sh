@@ -2,6 +2,8 @@
 
 POETRY_DIR=$PWD
 
+mkdir -p downloads
+
 # install bcm2835 drivers
 cd /tmp
 wget "http://www.airspayce.com/mikem/bcm2835/bcm2835-1.60.tar.gz"
