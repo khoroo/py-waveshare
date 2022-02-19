@@ -142,11 +142,6 @@ def draw_event(
         )
     )
 
-    epd.display(
-        epd.getbuffer(img),
-        epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
-    )
-
     return img, (y + font.getmask(text).size[1])
 
 
@@ -168,13 +163,30 @@ def main():
         img, y = draw_status_bar(epd, status_bar_state, resources_dir)
         while True:
             events = inotify.read()
+            refreshed_drawing_events = False
             for event in events:
-                img, y = draw_event(epd, event, resources_dir, y, img)
+                img, y = get_next_event_img(epd, event, resources_dir, y, img)
                 if y > epd.width:
+                    refreshed_drawing_events = True
+                    epd.display(
+                        epd.getbuffer(img),
+                        epd.getbuffer(
+                            Image.new("1", (epd.height, epd.width), 255)
+                        ),
+                    )
+                    time.sleep(2)
                     epd.Clear()
                     img, y = draw_status_bar(
                         epd, status_bar_state, resources_dir
                     )
+            if refreshed_drawing_events:
+                epd.display(
+                    epd.getbuffer(img),
+                    epd.getbuffer(
+                        Image.new("1", (epd.height, epd.width), 255)
+                    ),
+                )
+
             time.sleep(1)
 
     except IOError as e:
