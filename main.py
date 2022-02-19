@@ -90,19 +90,20 @@ def draw_status_bar(
     left_limit = 0
     print(font.getmask("hello world"))
     state_texts = (state.local_ip, state.wifi_name, state.wifi_db)
-    total_status_bar_text_width = sum(
+    state_texts_width = tuple(
         font.getmask(text).size[0] for text in state_texts
     )
-    if total_status_bar_text_width > epd.width:
+
+    total_state_text_width = sum(state_texts_width)
+
+    if total_state_text_width > epd.width:
         logging.info("status bar text longer than screen - cropping")
         hpad = 0
     else:
-        hpad = (
-            (epd.width - total_status_bar_text_width) / len(state_texts)
-        ) // 1
+        hpad = ((epd.width - total_state_text_width) / len(state_texts)) // 1
 
-    for text in state_texts:
-        text_width, _ = draw_text(
+    for text, text_width in zip(state_texts, state_texts_width):
+        draw_text(
             Text(
                 draw=draw_b,
                 pos=(left_limit, 0),
