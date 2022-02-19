@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 from PIL import Image, ImageDraw, ImageFont
 from dataclasses import dataclass
-from inotify_simple import INotify, flags
+from inotify_simple import Event, INotify, flags
 from pathlib import Path
 from typing import Tuple
 from waveshare_epd import epd2in13b_V3
@@ -119,7 +119,7 @@ def draw_status_bar(
 
 def draw_event(
     epd: epd2in13b_V3.EPD,
-    event: inotify_simple.Event,
+    event: Event,
     resources_dir: Path,
     y: int,
     img: Image,
