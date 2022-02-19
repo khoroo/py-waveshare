@@ -9,6 +9,7 @@ import socket
 import time
 import traceback
 
+
 def get_local_ip() -> str:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -16,13 +17,12 @@ def get_local_ip() -> str:
     s.close()
     return ip
 
+
 def draw_routine(resources_dir: Path) -> None:
     local_ip = get_local_ip()
 
-
     epd = epd2in13b_V3.EPD()
     point_centre = (epd.height // 2, epd.width // 2)
-    point_top_left = (10, 10)
     epd.init()
     epd.Clear()
 
@@ -36,7 +36,7 @@ def draw_routine(resources_dir: Path) -> None:
     )  # 298*126  ryimage: red or yellow image
     drawblack = ImageDraw.Draw(HBlackimage)
     drawry = ImageDraw.Draw(HRYimage)
-    drawblack.text(point_top_left, local_ip, anchor="lt", font=font, fill=0)
+    drawblack.text((0, 0), local_ip, anchor="lt", font=font, fill=0)
     epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HRYimage))
 
     # logging.info("4.read bmp file on window")
