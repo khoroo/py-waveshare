@@ -59,7 +59,6 @@ class Text:
     text: str
     font: ImageFont
     anchor: str = "lt"
-
     def draw(self) -> None:
         self.draw.text(
             self.pos, self.text, anchor=self.anchor, font=self.font, fill=0
@@ -116,6 +115,7 @@ def draw_status_bar(
 def draw_event_bar(
     epd: epd2in13b_V3.EPD,
     event,
+    resources_dir: Path,
     y: int,
     vpad: int = 2,
 ) -> int:
@@ -162,7 +162,7 @@ def main():
             events = inotify.read()
             for event in events:
                 print(type(event))
-                y = draw_event(epd, event, y)
+                y = draw_event(epd, event, resources_dir, y)
                 if y > epd.width:
                     epd.Clear()
                     y = draw_status_bar(epd, status_bar_state, resources_dir)
