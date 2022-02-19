@@ -38,7 +38,7 @@ class Display:
         return Pair(round((self.br.x - size.x) / 2), round((self.br.y - size.y) / 2))
 
 
-def draw_routine(resource_dir: Path) -> None:
+def draw_routine(resources_dir: Path) -> None:
     epd = epd2in13b_V3.EPD()
     display = Display(Pair(epd.width, epd.height))
     display_centre = (epd.height//2, epd.width//2)
@@ -47,7 +47,7 @@ def draw_routine(resource_dir: Path) -> None:
 
     # Drawing on the image
     logging.info("Drawing")
-    font20 = ImageFont.truetype(str(resource_dir / "Font.ttc"), 20)
+    font20 = ImageFont.truetype(str(resources_dir / "scientifica.ttf"), 20)
 
     HBlackimage = Image.new("1", (epd.height, epd.width), 255)  # 298*126
     HRYimage = Image.new(
@@ -55,7 +55,7 @@ def draw_routine(resource_dir: Path) -> None:
     )  # 298*126  ryimage: red or yellow image
     drawblack = ImageDraw.Draw(HBlackimage)
     drawry = ImageDraw.Draw(HRYimage)
-    drawblack.text(display_centre, "hello world", font=font20, fill=0)
+    drawblack.text(display_centre, "hello world", anchor="mm", font=font20, fill=0)
     epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HRYimage))
 
     # logging.info("4.read bmp file on window")
@@ -67,11 +67,11 @@ def draw_routine(resource_dir: Path) -> None:
 
 
 def main():
-    resource_dir = Path("./pic")
+    resources_dir = Path("./resources")
     logging.basicConfig(level=logging.DEBUG)
 
     try:
-        draw_routine(resource_dir)
+        draw_routine(resources_dir)
     except IOError as e:
         logging.info(e)
     except KeyboardInterrupt:
