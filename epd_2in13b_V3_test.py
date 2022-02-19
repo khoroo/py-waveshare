@@ -19,7 +19,6 @@ def main():
         logging.info("init and Clear")
         epd.init()
         epd.Clear()
-        time.sleep(1)
 
         # Drawing on the image
         logging.info("Drawing")
@@ -35,15 +34,8 @@ def main():
         drawry = ImageDraw.Draw(HRYimage)
         drawblack.text((10, 0), "hello world", font=font20, fill=0)
         epd.display(epd.getbuffer(HBlackimage), epd.getbuffer(HRYimage))
-        time.sleep(2)
 
-        # logging.info("3.read bmp file")
-        Blackimage = Image.open(str(picdir / "2in13bc-b.bmp"))
-        RYimage = Image.open(str(picdir / "2in13bc-ry.bmp"))
-        epd.display(epd.getbuffer(Blackimage), epd.getbuffer(RYimage))
-        time.sleep(2)
 
-        """    
         
         # logging.info("4.read bmp file on window")
         blackimage1 = Image.new('1', (epd.height, epd.width), 255)  # 298*126
@@ -51,7 +43,6 @@ def main():
         newimage = Image.open(os.path.join(picdir, '100x100.bmp'))
         blackimage1.paste(newimage, (0,0))
         epd.display(epd.getbuffer(blackimage1), epd.getbuffer(redimage1))
-        """
 
         logging.info("Clear...")
         epd.init()
