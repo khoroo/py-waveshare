@@ -119,7 +119,7 @@ def draw_status_bar(
 
 def draw_event(
     epd: epd2in13b_V3.EPD,
-    event,
+    event: inotify_simple.Event,
     resources_dir: Path,
     y: int,
     img: Image,
@@ -170,7 +170,6 @@ def main():
         while True:
             events = inotify.read()
             for event in events:
-                print(type(event))
                 img, y = draw_event(epd, event, resources_dir, y, img)
                 if y > epd.width:
                     epd.Clear()
