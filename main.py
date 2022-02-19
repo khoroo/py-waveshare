@@ -72,7 +72,7 @@ class Text:
 
 def draw_text(t: Text) -> Tuple[int]:
     t.draw.text(t.pos, t.text, anchor=t.anchor, font=t.font, fill=0)
-    print(t.font.getmask(text).size)
+    print(t.font.getmask(t.text).size)
     return 0, 0
 
 
