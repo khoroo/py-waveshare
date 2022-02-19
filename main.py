@@ -53,14 +53,22 @@ def get_status_bar_state() -> StatusBarState:
     )
 
 
-@dataclass
 class Text:
-    draw: ImageDraw.Draw
-    x: int
-    y: int
-    text: str
-    font: ImageFont
-    anchor: str = "lt"
+    def __init__(
+        self,
+        draw: ImageDraw.Draw,
+        x: int,
+        y: int,
+        text: str,
+        font: ImageFont,
+        anchor: str = "lt",
+    ):
+        self.draw = draw
+        self.x = x
+        self.y = y
+        self.text = text
+        self.font = font
+        self.anchor = anchor
 
     def draw(self) -> None:
         self.draw.text(
