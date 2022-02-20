@@ -177,20 +177,22 @@ def main():
     wd = inotify.add_watch("downloads/", watch_flags)
 
     try:
-        dr = draw_status_bar(epd, status_bar_state, resources_dir)
+        dr = get_status_bar_draw_return(epd, status_bar_state, resources_dir)
         draw_img(dr.img, epd)
         while True:
             events = inotify.read()
             refreshed_drawing_events = False
             for event in events:
-                dr = get_next_event_img(
+                dr = get_event_draw_return(
                     epd, event, resources_dir, dr.y, dr.img
                 )
                 if dr.y > epd.width:
                     refreshed_drawing_events = True
                     time.sleep(2)
                     epd.Clear()
-                    dr = draw_status_bar(epd, status_bar_state, resources_dir)
+                    dr = get_status_bar_draw_return(
+                        epd, status_bar_state, resources_dir
+                    )
             if not refreshed_drawing_events and len(events) > 0:
                 draw_img(dr.img, epd)
             time.sleep(1)
