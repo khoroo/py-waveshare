@@ -127,7 +127,7 @@ def get_event_draw_return(
     resources_dir: Path,
     y: int,
     img: Image,
-    vpad: int = 4,
+    vpad: int = 5,
 ) -> DrawReturn:
     event_flags = " ".join(str(flag) for flag in flags.from_mask(event.mask))
     text = f"{event.name}  {event_flags}"
