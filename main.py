@@ -73,7 +73,7 @@ class DrawReturn:
     y: int
 
 
-def draw_status_bar(
+def get_status_bar_draw_return(
     epd: epd2in13b_V3.EPD,
     state: StatusBarState,
     resources_dir: Path,
@@ -91,6 +91,8 @@ def draw_status_bar(
     max_state_text_height = max(
         font.getmask(text).size[1] for text in state_texts
     )
+
+    logging.info("getting status bar draw return")
 
     # height instead of width because epd object assumes vertical rotation
     if total_state_text_width > epd.height:
@@ -119,7 +121,7 @@ def draw_status_bar(
     return DrawReturn(img, line_height)
 
 
-def get_next_event_img(
+def get_event_draw_return(
     epd: epd2in13b_V3.EPD,
     event: Event,
     resources_dir: Path,
@@ -127,12 +129,12 @@ def get_next_event_img(
     img: Image,
     vpad: int = 4,
 ) -> DrawReturn:
-    event_flags = "    ".join(
-        str(flag) for flag in flags.from_mask(event.mask)
-    )
+    event_flags = " ".join(str(flag) for flag in flags.from_mask(event.mask))
     text = f"{event.name}  {event_flags}"
     draw = ImageDraw.Draw(img)
     font = ImageFont.load(str(resources_dir / "spleen-5x8.pil"))
+
+    logging.info(f'getting draw return for event "{event.name}"')
 
     draw_text(
         Text(
@@ -145,23 +147,19 @@ def get_next_event_img(
     )
     return DrawReturn(img, y + font.getmask(text).size[1])
 
-def draw_img(img: Image, epd: epd2in13b_V3.EPD, is_black:bool=True) -> None:
+
+def draw_img(img: Image, epd: epd2in13b_V3.EPD, is_black: bool = True) -> None:
+    logging.info("drawing image")
     if is_black:
         epd.display(
             epd.getbuffer(img),
-            epd.getbuffer(
-                Image.new("1", (epd.height, epd.width), 255)
-            ),
+            epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
         )
     else:
         epd.display(
-            epd.getbuffer(
-                Image.new("1", (epd.height, epd.width), 255)
-            ),
+            epd.getbuffer(Image.new("1", (epd.height, epd.width), 255)),
             epd.getbuffer(img),
         )
-
-
 
 
 def main():
@@ -193,7 +191,7 @@ def main():
                     time.sleep(2)
                     epd.Clear()
                     dr = draw_status_bar(epd, status_bar_state, resources_dir)
-            if refreshed_drawing_events:
+            if not refreshed_drawing_events and len(events) > 0:
                 draw_img(dr.img, epd)
             time.sleep(1)
 
