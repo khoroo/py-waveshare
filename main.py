@@ -145,6 +145,24 @@ def get_next_event_img(
     )
     return DrawReturn(img, y + font.getmask(text).size[1])
 
+def draw_img(img: Image, epd: epd2in13b_V3.EPD, is_black:bool=True) -> None:
+    if is_black:
+        epd.display(
+            epd.getbuffer(img),
+            epd.getbuffer(
+                Image.new("1", (epd.height, epd.width), 255)
+            ),
+        )
+    else:
+        epd.display(
+            epd.getbuffer(
+                Image.new("1", (epd.height, epd.width), 255)
+            ),
+            epd.getbuffer(img),
+        )
+
+
+
 
 def main():
     status_bar_state = get_status_bar_state()
@@ -162,6 +180,7 @@ def main():
 
     try:
         dr = draw_status_bar(epd, status_bar_state, resources_dir)
+        draw_img(dr.img, epd)
         while True:
             events = inotify.read()
             refreshed_drawing_events = False
@@ -171,23 +190,11 @@ def main():
                 )
                 if dr.y > epd.width:
                     refreshed_drawing_events = True
-                    epd.display(
-                        epd.getbuffer(dr.img),
-                        epd.getbuffer(
-                            Image.new("1", (epd.height, epd.width), 255)
-                        ),
-                    )
                     time.sleep(2)
                     epd.Clear()
                     dr = draw_status_bar(epd, status_bar_state, resources_dir)
             if refreshed_drawing_events:
-                epd.display(
-                    epd.getbuffer(dr.img),
-                    epd.getbuffer(
-                        Image.new("1", (epd.height, epd.width), 255)
-                    ),
-                )
-
+                draw_img(dr.img, epd)
             time.sleep(1)
 
     except IOError as e:
